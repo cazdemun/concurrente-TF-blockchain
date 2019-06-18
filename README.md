@@ -1,7 +1,7 @@
 # concurrente-TF-blockchain
 Trabajo Final Programación Concurrente y Distribuida
 
-Respetar la siguiente estructura...
+Respetar la siguiente estructura....
 
 ```golang
 type Route struct {

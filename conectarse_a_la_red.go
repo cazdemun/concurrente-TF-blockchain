@@ -22,7 +22,7 @@ type Node struct {
 
 func check(e error) {
 	if e != nil {
-		panic(e)
+		log.Fatalln(e)
 	}
 }
 

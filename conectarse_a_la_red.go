@@ -26,7 +26,7 @@ func check(e error) {
 	}
 }
 
-func getIP() string {
+func getPrivateIP() string {
 	addrs, err := net.InterfaceAddrs()
 	check(err)
 	for _, address := range addrs {
@@ -70,7 +70,7 @@ func main() {
 	// Pasar la ip de algun nodo por argumento del programa
 	// ej: 'go run conectarse_a_la_red.go 192.168.1.50'
 	destinationIP := os.Args[1]
-	myRoute := Route{IP: getIP(), Port: PORT}
+	myRoute := Route{IP: getPrivateIP(), Port: PORT}
 	log.Println("NODE IP: ", myRoute.IP)
 	destinationRoute := Route{IP: destinationIP, Port: PORT}
 	connectToNetwork(myRoute, destinationRoute)

@@ -7,7 +7,6 @@ import (
 	"log"
 	"net"
 	"os"
-	"time"
 )
 
 type Route struct {
@@ -20,8 +19,6 @@ type Node struct {
 	// 0 = nuevo, 1 = solo agrega
 	Instruction int `json:"Instruction"`
 }
-
-var routes = make([]Route, 0)
 
 func check(e error) {
 	if e != nil {
@@ -44,30 +41,38 @@ func getIP() string {
 	return ""
 }
 
-func connectToNetwork(routeToConnect string) {
+func connectToNetwork(sourceRoute Route, destinationRoute Route) {
 	log.Println("Uniendose a la red...")
-	con, err := net.Dial("tcp", routeToConnect)
+	con, err := net.Dial("tcp", fmt.Sprintf("%s:%s", destinationRoute.IP, destinationRoute.Port))
 	check(err)
 	defer con.Close()
-	node, err := json.Marshal(Node{Route: route, Instruction: 0})
+	node, err := json.Marshal(Node{Route: sourceRoute, Instruction: 0})
 	check(err)
-	log.Println(string(node))
+	//log.Println(string(node))
 	log.Println("Enviando mi ip...")
 	fmt.Fprintln(con, string(node))
 	log.Println("Recibiendo las demas ips...")
 	r := bufio.NewReader(con)
-	time.Sleep(500 * time.Millisecond)
+	//time.Sleep(500 * time.Millisecond) // comentar solo para pruebas
 	resp, err := r.ReadString('\n')
 	check(err)
-	fmt.Println("Agregando las ips: ", resp)
-	// TODO - agregar aqui...
+	//log.Println("Data:", resp)
+	json.Unmarshal([]byte(resp), &routes)
+	//log.Println(routes)
 	log.Println("Listo.")
 }
 
-var route Route
+const PORT string = "8001"
+
+var routes = make([]Route, 0)
 
 func main() {
-	route = Route{IP: getIP(), Port: "8001"}
-	log.Println("IP: ", route.IP)
-	connectToNetwork("192.168.1.50:8001")
+	// Pasar la ip de algun nodo por argumento del programa
+	// ej: 'go run conectarse_a_la_red.go 192.168.1.50'
+	destinationIP := os.Args[1]
+	fmt.Println(destinationIP)
+	myRoute := Route{IP: getIP(), Port: PORT}
+	log.Println("NODE IP: ", myRoute.IP)
+	destinationRoute := Route{IP: destinationIP, Port: PORT}
+	connectToNetwork(myRoute, destinationRoute)
 }

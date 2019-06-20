@@ -2,11 +2,23 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"net"
 	"os"
 	"time"
 )
+
+type Route struct {
+	IP   string `json: "IP"`
+	Port string `json:"Port"`
+}
+
+type Node struct {
+	Route Route `json: "Route"`
+	// 0 = nuevo, 1 = solo agrega
+	Instruction int `json:"Instruction"`
+}
 
 func handle(con net.Conn) {
 	defer con.Close()
@@ -14,18 +26,11 @@ func handle(con net.Conn) {
 	fmt.Println("Conexion establecida, esperando instruccion...")
 	msg, _ := r.ReadString('\n')
 	fmt.Println("Recibido: ", msg)
-	fmt.Fprintln(con, "buena!")
-	fmt.Println("Respuesta enviada...")
+	routes := []Route{Route{IP: "123456", Port: "8001"}, Route{IP: "654321", Port: "8001"}}
+	node, _ := json.Marshal(routes)
+	fmt.Fprintln(con, string(node))
+	fmt.Println("Respuesta enviada.")
 	time.Sleep(time.Second)
-	os.Exit(0)
-	//sendMessage("bien", "192.168.1.50:8001", con)
-}
-
-func sendMessage(msg string, route string, con net.Conn) {
-	//con, _ := net.Dial("tcp", route)
-	//defer con.Close()
-	fmt.Fprintln(con, msg)
-	fmt.Println("Respuesta enviada...")
 	os.Exit(0)
 }
 

@@ -1,33 +1,73 @@
 package main
 
 import (
-    "net"
-    "fmt"
 	"bufio"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net"
 )
 
-var ips = make([]string,0)
+var activeRoutes = make([]Route, 0)
 
-func startServer() {
+func startServer(sourceRoute Route) {
 	fmt.Println("Iniciando Servidor guardador...")
-	ln, _:= net.Listen("tcp", "10.11.97.218:8123")
+	ln, err := net.Listen("tcp", fmt.Sprintf("%s:%s", sourceRoute.IP, sourceRoute.Port))
+	checkError(err)
 	defer ln.Close()
-	fmt.Println("Escuchando por puerto 8123")
+	fmt.Printf("Escuchando:\n IP %s - Puerto %s\n", sourceRoute.IP, sourceRoute.Port)
 	for {
-		con, _ := ln.Accept()
+		con, err := ln.Accept()
+		checkError(err)
 		go handleServerRequest(con)
 	}
+}
+
+func sendNewIP(route Route) error {
+	con, err := net.Dial("tcp", fmt.Sprintf("%s:%s", route.IP, route.Port))
+	if err != nil {
+		return err
+	}
+	defer con.Close()
+
+	routeRaw, err := json.Marshal(route)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintln(con, string(routeRaw))
+
+	return nil
 }
 
 func handleServerRequest(con net.Conn) {
 	defer con.Close()
 	r := bufio.NewReader(con)
-	for {
-		msg, _ := r.ReadString('\n')
-		fmt.Print("IP nueva recibida: ",msg)
-		ips = append(ips,msg)
+	data, err := r.ReadString('\n')
+	checkError(err)
+	newNode := Node{}
+	json.Unmarshal([]byte(data), &newNode)
+	log.Printf("Nuevo nodo activo recibido %v\n", newNode)
+
+	if newNode.Instruction == 0 {
+		log.Println("Enviando la nueva ruta a los nodos activos...")
+		for _, route := range activeRoutes {
+			err := sendNewIP(route)
+			checkError(err)
+		}
 	}
+
+	log.Println("Enviando las rutas activas al nuevo nodo...")
+	sendRoutes, err := json.Marshal(activeRoutes)
+	fmt.Fprintln(con, string(sendRoutes))
+
+	log.Println("Agregando nueva ruta a la lista...")
+	activeRoutes = append(activeRoutes, newNode.Route)
+
+	log.Println("Nueva ruta agregada.")
 }
 
 func main() {
+	serverRoute := Route{IP: getPrivateIP(), Port: "2005"}
+	startServer(serverRoute)
 }

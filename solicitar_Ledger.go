@@ -38,18 +38,7 @@ type Ledger struct {
 
 var blockchain []Block
 
-// type info struct{
-// 	index string
-// }
-
-//IP
-//Abrir el cliente
-//Mensaje "Hola"
-//Respuesta deserializar
-//Imprimir en pantalla
-//
 func Encoder() {
-	//block=:=`{"data":{"index":"0","Timestamp":"11-05-1992","Hash":"312","Prevhash":"123","Payload":"1231"}}`
 
 	block := Block{
 		Index:     10,
@@ -64,24 +53,11 @@ func Encoder() {
 }
 
 func Decoder(_msg string) {
-	// block := `{\"Index\":0,\"Timestamp\":\"11-05-1992\",\"Hash\":\"312\",\"Prevhash\":\"123\",\"Payload\":\"1231\"},{\"Index\":0,\"Timestamp\":\"11-05-1992\",\"Hash\":\"312\",\"Prevhash\":\"123\",\"Payload\":\"1231\"}`
-	// _msg := `{"Index":0,"Timestamp":"11-05-1992","Hash":"312","Prevhash":"123","Payload":"1231"}`
-	// bytes := []byte(`{"Index":0,"Timestamp":"11-05-1992","Hash":"312","Prevhash":"123","Payload":"1231"}`)
 
 	bytes := []byte(_msg)
 	var block_ Block
 
 	json.Unmarshal(bytes, &block_)
-	// blockchain[0] = block_
-	// blockchain[0] = block_
-
-	// fmt.Printf("Raw Data: ")
-	// fmt.Println(block_)
-	// fmt.Printf("Index=%d\n", block_.Index)
-	// fmt.Printf("Timestamp=%s\n", block_.Timestamp)
-	// fmt.Printf("Hash=%s\n", block_.Hash)
-	// fmt.Printf("Prevhash=%s\n", block_.PrevHash)
-	// fmt.Printf("Payload=%s\n", block_.Payload)
 	blockchain = append(blockchain, block_)
 	for l := range blockchain {
 		fmt.Printf("-------------------\n")
@@ -129,14 +105,6 @@ func start() {
 }
 
 func main() {
-	// rand.Seed(time.Now().UTC().UnixNano())
-	// ln, _ := net.Listen(PROTOCOL, LOCALHOST)
-	// defer ln.Close()
-	// go start()
-	// for {
-	// 	con, _ := ln.Accept()
-	// 	go handle(con)
-	// }
 	Decoder(`{"Index":0,"Timestamp":"11-05-1992","Hash":"312","Prevhash":"123","Payload":"1231"}`)
 	Decoder(`{"Index":1,"Timestamp":"11-05-1992","Hash":"312","Prevhash":"123","Payload":"1231"}`)
 	Decoder(`{"Index":2,"Timestamp":"11-05-1992","Hash":"312","Prevhash":"123","Payload":"1231"}`)

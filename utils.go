@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"crypto/sha256"
 	"strconv"
-	"fmt"
 )
 
 type Message struct {
@@ -61,8 +60,8 @@ type Config struct {
 }
 
 func mostCommonHash(hashes []string) string {
-	m := make(map[string]int) //We are going to count occurrence of item here
-  compare := 0  //We are going to compare using stored value
+	m := make(map[string]int)
+  compare := 0
   var mostFrequent string
 
 	for _, h := range hashes {

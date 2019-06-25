@@ -4,9 +4,7 @@ import (
 	"net"
 	"fmt"
 	"bufio"
-	//"sync"
-	// "time"
-	// "strconv"
+	"encoding/json"
 )
 
 func send(con net.Conn, msg Message) {
@@ -30,43 +28,23 @@ func request(con net.Conn,msg Message) string {
 }
 
 func sendTransaction(con net.Conn, msg Message) {
-	// t := time.Now().Unix()
-	// msg := Message {1, "1@doctor@algo@mas", strconv.FormatInt(t, 10)}
 	send(con, msg)
 }
 
-//func requestHash(ip string, c chan string, wg *sync.WaitGroup) {
 func requestHash(ip string, c chan<- string) {
 	con, _ := net.Dial("tcp", ip)
 	msg := Message {2, "", "0"}
 	res := request(con, msg)
 	c <- res
-	//wg.Done()
-	//fmt.Println("Respuesta: ", res)
 }
 
-// return ledger
-func requestLedger(con net.Conn) {
+func requestLedger(ip string) BlockChain {
+	con, _ := net.Dial("tcp", ip)
 	msg := Message {3, "", "0"}
 	res := request(con, msg)
-	fmt.Println("Respuesta: ", len(res))
+	fmt.Println("Respuesta request ledger: ", res)
 
+	var newBc BlockChain
+	json.Unmarshal([]byte(res), &newBc)
+	return newBc
 }
-
-// func main() {
-// 	// gin := bufio.NewReader(os.Stdin)
-	
-// 	// for {
-// 	// 	fmt.Print("Mensaje: ")
-// 	// 	input, _ := gin.ReadString('\n')
-// 	// 	fmt.Printf("Escribiste: %s", input)
-// 	// }
-
-// 	for {
-// 		time.Sleep(2000 * time.Millisecond)
-// 		con, _ := net.Dial("tcp", "localhost:8000")
-// 		go sendTransaction(con)
-// 		//go requestHash(con)
-// 		//go requestLedger(con)
-// 	}
-// }

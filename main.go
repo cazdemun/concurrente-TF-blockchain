@@ -22,44 +22,59 @@ import (
 	"bufio"
 )
 
+//func handleTx(tx struct ) {
+func handleTx(tx string) {
+// 	hash := calculateHash(tx.message)
+//	var hashes []string // channel
+
+// 	for all IPs {
+// 		go requestHashes(hashes [])
+//	}
+
+//	if (hash != majority(hashes)) {
+//		blockchain = requestLedger(random(IPs))
+//	}
+}
+
+func handleHash() {
+//	sendHash(blockchain.last.hash)
+}
+
+func handleLedger() {
+//	sendLedger(blockchain.serialize)
+}
+
 func handle(con net.Conn) {
 	defer con.Close()
 
-	fmt.Println("Manejando mensaje")
 	r := bufio.NewReader(con)
-
-	for {
-		msg, _ := r.ReadString('\n')
-		fmt.Fprint(con, "test")
-		fmt.Println("recibido: ", msg)
-		
-		//fmt.Println(con, msg)
-		
-		// if len(msg) == 0 ||  msg[0] == 'x' {
-			// 	break
-			// }
-		}
-	}
+	msg, _ := r.ReadString('\n')
 	
-	func main() {
-		ln, _ := net.Listen("tcp", "localhost:8000")
-		defer ln.Close()
-		
-		fmt.Println("Esperando: ")
-		con, _ := ln.Accept()
-		defer con.Close()
-		
-		r := bufio.NewReader(con)
-		msg, _ := r.ReadString('\n')
-		fmt.Println("Recibido: ", msg)
-		fmt.Fprint(con, msg)
+	fmt.Println("Recibido: ", msg)
+	// tx := deserialize(msg)
 
-
-	// for {
-	// 	fmt.Println("k pasa aka")
-	// 	con, _ := ln.Accept()
-	// 	go handle(con)
-	// }
+	// this one can't be
+	fmt.Fprint(con, "Mensaje recibido!")
+	
+	// handlers
+	// if code == 1 handleTx()	
+	// if code == 2 handleHash()
+	// if code == 3 handleLedger()
+	
 }
 
-// go frameworks servidor
+func initBlockchainServer(port string) {
+	ln, _ := net.Listen("tcp", "localhost:" + port)
+	defer ln.Close()
+	fmt.Printf("Opening blockchain server: %s \n\n", port)
+	
+	for {
+		con, _ := ln.Accept()
+		go handle(con)
+	}	
+}
+	
+func main() {
+	port := "8000"
+	initBlockchainServer(port)
+}

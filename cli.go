@@ -4,43 +4,34 @@ import (
 	"net"
 	"fmt"
 	"bufio"
+	
+	"time"
+	//"strconv"
 	// "os"
 )
 
-// func main() {
-// 	con, err := net.Dial("tcp", "localhost:8000")
-// 	if err != nil {
-// 		fmt.Println("No se puede conectar.")
-// 		return
-// 	}
-// 	defer con.Close()
-// 	fmt.Fprintln(con, "Hola, soy cliente")
-// }
-
-func main() {
-	// Dial, weird sintaxys for client
-	con, _ := net.Dial("tcp", "localhost:8000")
+func send(con net.Conn) {
 	defer con.Close()
-	fmt.Fprintln(con, "Hola, soy cliente")
 
+	fmt.Fprintln(con, "Hola, soy cliente ")
+	
 	r := bufio.NewReader(con)
 	msg, _ := r.ReadString('\n')
-	fmt.Println("Respondido: ", msg)
+	fmt.Println("Respuesta: ", msg)
+}
 
-	//gin := bufio.NewReader(os.Stdin)
+func main() {
+	// gin := bufio.NewReader(os.Stdin)
 	
-	
-
 	// for {
-	// 	fmt.Print("\n Mensaje: ")
-	// 	msg, _ := gin.ReadString('\n')
-	// 	fmt.Fprint(con, msg)
-	// 	resp, _ := r.ReadString('\n')
-	// 	fmt.Print("Respuesta: ", resp)
-	// 	// if msg[0] == 'x' {
-	// 	// 	break
-	// 	// }
-	// }
+		// 	fmt.Print("Mensaje: ")
+		// 	input, _ := gin.ReadString('\n')
+		// 	fmt.Printf("Escribiste: %s", input)
+		// }
 
-	//fmt.Fprintln(con, "Hola, soy cliente")
+	for {
+		time.Sleep(500 * time.Millisecond)
+		con, _ := net.Dial("tcp", "localhost:8000")
+		go send(con)
+	}
 }

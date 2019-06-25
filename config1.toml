@@ -1,0 +1,4 @@
+port = "8000"
+neighbours = [
+  "localhost:8001",
+  "localhost:8002"]

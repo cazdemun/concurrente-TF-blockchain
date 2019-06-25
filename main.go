@@ -20,27 +20,37 @@ import (
 	"net"
 	"fmt"
 	"bufio"
+
+	"encoding/json"
+	// "github.com/davecgh/go-spew/spew"
 )
 
-//func handleTx(tx struct ) {
-func handleTx(tx string) {
-// 	hash := calculateHash(tx.message)
-//	var hashes []string // channel
+type Message struct {
+	Type     int
+	Payload string
+}
 
-// 	for all IPs {
-// 		go requestHashes(hashes [])
+func handleTx(con net.Conn, tx Message) {
+	fmt.Fprint(con, "Mensaje recibido 1!")
+	// 	hash := calculateHash(tx.message)
+	//	var hashes []string // channel
+
+	// 	for all IPs {
+// 		go requestHash(IP, hashes [])
 //	}
 
 //	if (hash != majority(hashes)) {
-//		blockchain = requestLedger(random(IPs))
-//	}
+	//		blockchain = requestLedger(random(IPs))
+	//	}
 }
 
-func handleHash() {
-//	sendHash(blockchain.last.hash)
+func handleHash(con net.Conn) {
+	fmt.Fprint(con, "Mensaje recibido 2!")
+	//	sendHash(blockchain.last.hash)
 }
 
-func handleLedger() {
+func handleLedger(con net.Conn) {
+	fmt.Fprint(con, "Mensaje recibido 3!")
 //	sendLedger(blockchain.serialize)
 }
 
@@ -50,17 +60,24 @@ func handle(con net.Conn) {
 	r := bufio.NewReader(con)
 	msg, _ := r.ReadString('\n')
 	
+	var tx Message
+	
 	fmt.Println("Recibido: ", msg)
-	// tx := deserialize(msg)
-
-	// this one can't be
-	fmt.Fprint(con, "Mensaje recibido!")
 	
-	// handlers
-	// if code == 1 handleTx()	
-	// if code == 2 handleHash()
-	// if code == 3 handleLedger()
+	json.Unmarshal([]byte(msg), &tx)
+	//spew.Dump(tx)
 	
+	messageType := tx.Type
+	
+	if messageType == 1 {
+		handleTx(con, tx)	
+	} else if messageType == 2 {
+		handleHash(con)
+	} else if messageType == 2 {
+		handleLedger(con)
+	} else {
+		fmt.Fprint(con, "Mensaje recibido!")
+	}	
 }
 
 func initBlockchainServer(port string) {

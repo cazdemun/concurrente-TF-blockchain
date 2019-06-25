@@ -27,12 +27,11 @@ func connectToNetwork(sourceRoute Route, destinationRoute Route) {
 
 	log.Println("Recibiendo datos de los demás nodos...")
 	r := bufio.NewReader(con)
-	//time.Sleep(500 * time.Millisecond) // comentar solo para pruebas
 	resp, err := r.ReadString('\n')
 	checkError(err)
 	log.Println("Rutas recibidas:", resp)
 	json.Unmarshal([]byte(resp), &routes)
-
+	routes = append(routes,destinationRoute)
 	log.Println("Listo.")
 }
 

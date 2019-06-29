@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"bufio"
 	"encoding/json"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func send(con net.Conn, msg Message) {
@@ -43,9 +44,10 @@ func requestLedger(ip string) BlockChain {
 	con, _ := net.Dial("tcp", ip)
 	msg := Message {3, "", "0"}
 	res := request(con, msg)
-	fmt.Println("Respuesta request ledger: ", res)
-
+	fmt.Println("Respuesta request ledger: ")
+	
 	var newBc BlockChain
 	json.Unmarshal([]byte(res), &newBc)
+	spew.Dump(newBc)
 	return newBc
 }

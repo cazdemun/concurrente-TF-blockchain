@@ -59,8 +59,20 @@ func (bc BlockChain) getLen() int {
 }
 
 type Config struct {
-  Port string
+	Ip string
+	Port string
+	DPort string
   Neighbours []string
+}
+
+func (bc *Config) append(s string) {
+	bc.Neighbours = append(bc.Neighbours, s)
+}
+
+func (hash Config) toString() string {
+	stringByte, _ := json.Marshal(hash)
+	stringHash := string(stringByte)
+	return stringHash
 }
 
 type HashInfo struct {
@@ -91,4 +103,16 @@ func getMostCommonHash(hashes []HashInfo) string {
 	}
 	
 	return mostFrequent
+}
+
+type Node struct {
+	// 0 = nuevo, 1 = solo agrega
+	Instruction int
+	Ip string
+}
+
+func (hash Node) toString() string {
+	stringByte, _ := json.Marshal(hash)
+	stringHash := string(stringByte)
+	return stringHash
 }

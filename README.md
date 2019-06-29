@@ -1,5 +1,5 @@
-# concurrente-TF-blockchain
 Trabajo Final Programación Concurrente y Distribuida
 
+# Uso
 
-go run utils.go cli.go main.go config1.toml
+go run utils.go cli.go main.go

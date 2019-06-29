@@ -54,24 +54,39 @@ func (bc BlockChain) toString() string {
 	return stringBC
 }
 
+func (bc BlockChain) getLen() int {
+	return len(bc.Blockchain)
+}
+
 type Config struct {
   Port string
   Neighbours []string
 }
 
-func mostCommonHash(hashes []string) string {
+type HashInfo struct {
+  Hash string
+  IP string
+}
+
+func (hash HashInfo) toString() string {
+	stringByte, _ := json.Marshal(hash)
+	stringHash := string(stringByte)
+	return stringHash
+}
+
+func getMostCommonHash(hashes []HashInfo) string {
 	m := make(map[string]int)
   compare := 0
   var mostFrequent string
 
 	for _, h := range hashes {
-		word := h
+		word := h.Hash
 
 		m[word] = m[word] + 1 
 
 		if m[word] > compare { 
 			 compare = m[word]  
-			 mostFrequent = h
+			 mostFrequent = h.Hash
 		}
 	}
 	

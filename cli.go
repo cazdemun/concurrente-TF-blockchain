@@ -35,6 +35,7 @@ func requestHash(ip string, c chan<- string) {
 	con, _ := net.Dial("tcp", ip)
 	msg := Message {2, "", "0"}
 	res := request(con, msg)
+	// here we could unmarshall, but we wont
 	c <- res
 }
 

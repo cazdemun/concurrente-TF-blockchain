@@ -9,11 +9,13 @@ import (
 	"time"
 	"os"
 	"github.com/BurntSushi/toml"
+
+	"math/rand"
 )
 
-func handleTx(con net.Conn, tx Message) {
+func handleTx(con net.Conn, msg Message) {
 	// Adding new block
-	newBlock := Block {len(bc.Blockchain), tx.Timestamp, "", bc.LastBlock.Hash, tx.Payload}
+	newBlock := Block {bc.getLen(), msg.Timestamp, "", bc.LastBlock.Hash, msg.Payload}
 	newBlock.Hash = newBlock.calculateHash()
 	bc.append(newBlock)
 	
@@ -23,37 +25,54 @@ func handleTx(con net.Conn, tx Message) {
 	for _,n := range conf.Neighbours {
 		go requestHash(n, hashes)
 	}
-
-	// Verifiyng last block hash
-	var hashesS []string
-
-	for i := range conf.Neighbours {
-		hashesS = append(hashesS, <-hashes)
-		fmt.Println("Hash from ", i, ": ", hashesS[len(hashesS) - 1])
-	}
-
-	mCHash := mostCommonHash(hashesS)
 	
-	if newBlock.Hash != mCHash {
-		fmt.Println("houston we have problems")
-		bc = requestLedger("localhost:8000")
+	// Finding most common hash
+	var hashesInfo []HashInfo
+	
+	for range conf.Neighbours {
+		var hashInfo HashInfo
+		json.Unmarshal([]byte(<-hashes), &hashInfo)
+		hashesInfo = append(hashesInfo, hashInfo)
+
+		fmt.Println("Hash from ", hashInfo.IP, ": ", hashInfo.Hash)
+	}
+	
+	mostCommonHash := getMostCommonHash(hashesInfo)
+	
+	if newBlock.Hash != mostCommonHash {
+		fmt.Println("Current hash does not match with majority")
+		
+		// Prunning IPs
+		var selectablesIps []string
+		for _,h := range hashesInfo {
+			if h.Hash == mostCommonHash {
+				selectablesIps = append(selectablesIps, h.IP)
+			}
+		}
+
+		// Requesting and replacing current blockchain
+		rand.Seed(time.Now().Unix())
+		bc = requestLedger(selectablesIps[rand.Intn(len(selectablesIps))])
+		
 		fmt.Fprint(con, "houston we have problems")
 	} else {	
 		fmt.Fprint(con, "Transaccion recibida!")
 	}
 }
-
-func handleHash(con net.Conn) {
-	fmt.Fprint(con, bc.LastBlock.Hash)
+	
+func handleHashRequest(con net.Conn) {
+	IPString := "localhost:" + conf.Port
+	hashInfo := HashInfo {bc.LastBlock.Hash, IPString}
+	fmt.Fprint(con, hashInfo.toString())
 }
 
-func handleLedger(con net.Conn) {
+func handleLedgerRequest(con net.Conn) {
 	fmt.Fprint(con, bc.toString())
 }
 
 func handle(con net.Conn) {
 	defer con.Close()
-
+	
 	r := bufio.NewReader(con)
 	msg, _ := r.ReadString('\n')
 	
@@ -62,16 +81,16 @@ func handle(con net.Conn) {
 	fmt.Println("Peticion recibida: ", tx.Type)
 	
 	messageType := tx.Type
-
+	
 	switch messageType {
-		case 1:
-			handleTx(con, tx)	
-		case 2:
-			handleHash(con)
-		case 3:
-			handleLedger(con)
-		default:
-			fmt.Fprint(con, "Mensaje recibido, codigo incorrecto!")
+	case 1:
+		handleTx(con, tx)	
+	case 2:
+		handleHashRequest(con)
+	case 3:
+		handleLedgerRequest(con)
+	default:
+		fmt.Fprint(con, "Mensaje recibido, codigo incorrecto!")
 	}
 }
 
@@ -98,7 +117,13 @@ func genesisBC() BlockChain {
 	block3 := Block{3, "1561451993", "", block2.calculateHash(), "asd@fgh"}
 	block3.Hash = block3.calculateHash()
 	bc.append(block3)
-	// bc.append(block3)
+	
+	rand.Seed(time.Now().UTC().UnixNano())
+	chance := rand.Intn(11)
+	
+	if chance < 5 {
+		bc.append(block3)
+	}
 	
 	return bc
 }
@@ -114,7 +139,6 @@ func main() {
 	fmt.Println(tomfile)
 
 	toml.DecodeFile(tomfile, &conf)
-	
 	fmt.Println(len(bc.Blockchain))
 
 	go initBlockchainServer(conf.Port)
@@ -126,7 +150,7 @@ func main() {
 		
 		t := time.Now().Unix()
 		msg := Message {1, "1@doctor@algo@mas", strconv.FormatInt(t, 10)}
-		newBlock := Block {len(bc.Blockchain), msg.Timestamp, "", bc.LastBlock.Hash, msg.Payload}
+		newBlock := Block {bc.getLen(), msg.Timestamp, "", bc.LastBlock.Hash, msg.Payload}
 		newBlock.Hash = newBlock.calculateHash()
 		bc.append(newBlock)
 
